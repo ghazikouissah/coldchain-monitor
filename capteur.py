@@ -1,4 +1,5 @@
 class Capteur:
+    
     def __init__(self, id, temperature, humidite, statut_clim, id_camion):
         if not isinstance(temperature, (int, float)):
              raise ValueError(f"Température invalide : {temperature}")
@@ -10,6 +11,15 @@ class Capteur:
         self.humidite =humidite
         self.statut_clim=statut_clim
         self.id_camion=id_camion
+    
+    def to_dict(self):
+         return {
+              "id": self.id,
+              "temperature": self.temperature,
+              "humidite": self.humidite,
+              "statut_clim": self.statut_clim,
+              "id_camion": self.id_camion
+              }
 
     def   afficher(self):
           print(f"ID: {self.id}, Température: {self.temperature}°C")
@@ -23,6 +33,10 @@ class Capteur:
               return False
     def clim(self):
          return self.statut_clim == False
+    @staticmethod
+    def from_dict(data):
+     return Capteur(data["id"], data["temperature"], data["humidite"], data["statut_clim"], data["id_camion"])
+
     
 if __name__ == "__main__":
     c1 = Capteur("ESP32-01", 67.8, 45.2, False, "CAM-01")

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "CAM-01",
+    "chauffeur": "aziz",
+    "capteurs": [
+      {
+        "id": "ESP32-01",
+        "temperature": 67.8,
+        "humidite": 45.2,
+        "statut_clim": false,
+        "id_camion": "CAM-01"
+      }
+    ]
+  },
+  {
+    "id": "CAM-02",
+    "chauffeur": "ahmed",
+    "capteurs": [
+      {
+        "id": "ESP32-02",
+        "temperature": -20.0,
+        "humidite": 60.0,
+        "statut_clim": true,
+        "id_camion": "CAM-02"
+      }
+    ]
+  }
+]
