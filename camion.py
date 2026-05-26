@@ -7,7 +7,12 @@ class camion:
         self.capteurs=[]
     
     def ajouter_capteur(self,capteur):
-        self.capteurs.append(capteur)
+        try:
+            self.capteurs.append(capteur)
+            print(f"capteur{capteur.id} ajoute")
+        except Exception as e:
+            print(f"Erreur ajout capteur : {e}")
+
     def afficher_camion(self):
         print(f"le chauffeur {self.chauffeur} de  {self.id} ")
         for capteur in self.capteurs:
@@ -20,12 +25,29 @@ class camion:
                 print(f"ALERTE camion {self.id} : clim coupée")
 
 if __name__ == "__main__":
-    cam1= camion("camion 01","aziz") 
-    cam2= camion("camion 02","ahmed") 
-    cam1.ajouter_capteur(Capteur("ESP32-01", 67.8, 45.2, False, "CAM-01"))
+    cam1 = camion("CAM-01", "aziz")
+    cam2 = camion("CAM-02", "ahmed")
+    
+    # capteur valide
+    try:
+        cam1.ajouter_capteur(Capteur("ESP32-01", 67.8, 45.2, False, "CAM-01"))
+    except ValueError as e:
+        print(f"Capteur invalide : {e}")
+    
+    # capteur invalide
+    try:
+        cam1.ajouter_capteur(Capteur("ESP32-03", "invalide", 45.2, False, "CAM-01"))
+    except ValueError as e:
+        print(f"Capteur invalide : {e}")
+    
     cam1.afficher_camion()
     cam1.verifier_alerts()
-    cam2.ajouter_capteur(Capteur("ESP32-02", -20.0, 60.0, True, "CAM-02"))
+    
+    try:
+        cam2.ajouter_capteur(Capteur("ESP32-02", -20.0, 60.0, True, "CAM-02"))
+    except ValueError as e:
+        print(f"Capteur invalide : {e}")
+    
     cam2.afficher_camion()
     cam2.verifier_alerts()
 

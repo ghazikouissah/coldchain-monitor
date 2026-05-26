@@ -1,5 +1,10 @@
 class Capteur:
     def __init__(self, id, temperature, humidite, statut_clim, id_camion):
+        if not isinstance(temperature, (int, float)):
+             raise ValueError(f"Température invalide : {temperature}")
+        if not isinstance(humidite, (int, float)):
+             raise ValueError(f"Humidité invalide : {humidite}")
+             
         self.id = id
         self.temperature =temperature
         self.humidite =humidite
