@@ -1,4 +1,5 @@
-
+const { createCamionValidator } = require("../validators/camionValidator");
+const { protect, restrictTo } = require("../middleware/auth");
 const {
   createCamion,
   getAllCamion,
@@ -13,10 +14,10 @@ const router = express.Router();
 
 
 
-router.route("/").post(createCamion).get(getAllCamion);
+router.route("/").post(protect, restrictTo("admin"), createCamionValidator, createCamion).get(protect, getAllCamion);
 router
   .route("/:id")
-  .get(getCamionById)
+  .get(protect,getCamionById)
   
 
 module.exports = router;
