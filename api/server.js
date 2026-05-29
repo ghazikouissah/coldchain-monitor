@@ -16,7 +16,7 @@ const limiter = rateLimit({
 
 
 
-dotenv.config({ path: "./.env" });
+require('dotenv').config();
 
 mongoose
   .connect(process.env.DATABASE)

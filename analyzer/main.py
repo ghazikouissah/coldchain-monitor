@@ -1,6 +1,6 @@
 import requests
 import sys
-sys.path.append("..")
+sys.path.append("./shared")
 from capteur import Capteur
 
 

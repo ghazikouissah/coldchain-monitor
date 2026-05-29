@@ -1,0 +1,14 @@
+services:
+  api:
+    build: ./api
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+
+  analyzer:
+    build:
+      context: .
+      dockerfile: analyzer/Dockerfile
+    depends_on:
+      - api

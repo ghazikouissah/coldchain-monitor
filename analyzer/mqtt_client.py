@@ -1,7 +1,7 @@
 import paho.mqtt.client as mqtt
 import json
 import sys
-sys.path.append("..")
+sys.path.append("./shared")
 from capteur import Capteur
 
 def on_connect(client, userdata, flags, rc):
@@ -24,7 +24,7 @@ def on_message(client, userdata, msg):
 
 
 
-client = mqtt.Client()
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 client.tls_set()
 client.username_pw_set("esp32_ghazi", "Esp32@2026")
 client.on_connect = on_connect
