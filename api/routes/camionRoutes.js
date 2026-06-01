@@ -4,6 +4,8 @@ const {
   createCamion,
   getAllCamion,
   getCamionById,
+  updateCamion,
+  deleteCamion,
   
 } = require("../controllers/camionController");
 
@@ -18,6 +20,8 @@ router.route("/").post(protect, restrictTo("admin"), createCamionValidator, crea
 router
   .route("/:id")
   .get(protect,getCamionById)
+  .put(protect,updateCamion)
+  .delete(protect,deleteCamion)
   
 
 module.exports = router;

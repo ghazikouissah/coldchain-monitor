@@ -1,12 +1,12 @@
 const Camion = require("../models/CamionModel");
-
+const AppError = require("../utils/AppError");
 const { validationResult } = require("express-validator");
 
-exports.createCamion = async (req, res) => {
+exports.createCamion = async (req, res,next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    return res.status(400).json({ errors: errors.array() });
+}
   try {
     const newCamion = await Camion.create(req.body);
     res.status(201).json({
@@ -14,14 +14,11 @@ exports.createCamion = async (req, res) => {
       data: newCamion,
     });
   } catch (error) {
-    res.status(400).json({
-      message: "fail ",
-      error: error,
-    });
+    next(error)
   }
 };
 
-exports.getAllCamion = async (req, res) => {
+exports.getAllCamion = async (req, res,next) => {
   try {
     const camions = await Camion.find();
     res.status(200).json({
@@ -29,20 +26,17 @@ exports.getAllCamion = async (req, res) => {
       data: camions
     });
   } catch (error) {
-    res.status(400).json({
-      message: "Fail ",
-      error: error,
-    });
+    next(error)
+    
   }
 };
 
-exports.getCamionById = async (req, res) => {
+exports.getCamionById = async (req, res,next) => {
   try {
     const camion = await Camion.findOne({ id: req.params.id });
     if (!camion) {
-      return res.status(404).json({
-        message: "camion not found ",
-      });
+      return next (new AppError("camion n'est pas trouve", 404));
+      
     }
     res.status(200).json({
       message: "camion trouve",
@@ -51,10 +45,30 @@ exports.getCamionById = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(400).json({
-      message: "fail ",
-      error: error,
-    });
+    next(error)
+  }
+};
+ 
+exports.updateCamion = async (req, res,next) => {
+  try {
+    const camion = await Camion.findOneAndUpdate({ id: req.params.id },req.body,{ new: true});
+    if (!camion) {
+      return next (new AppError("camion n'est pas trouve", 404));;
+    }
+    res.status(200).json({ message: "camion modifie", data: camion });
+  } catch (error) {
+    next(error)
   }
 };
 
+exports.deleteCamion = async (req, res,next) => {
+  try {
+    const camion = await Camion.findOneAndDelete({ id: req.params.id });
+    if (!camion) {
+      return next (new AppError("camion n'est pas trouve", 404));;
+    }
+    res.status(200).json({ message: "camion supprime", data: camion });
+  } catch (error) {
+    next(error)
+  }
+};
