@@ -1,5 +1,6 @@
 const Capteur = require("../models/CapteurModel");
 const AppError = require("../utils/AppError");
+const logger = require("../utils/logger");
 const { validationResult } = require("express-validator");
 
 exports.createCapteur = async (req, res,next) => {
@@ -8,7 +9,9 @@ exports.createCapteur = async (req, res,next) => {
         return res.status(400).json({ errors: errors.array() });
     }
   try {
+    
     const newCapteur = await Capteur.create(req.body);
+    logger.info({ message: "capteur cree", id: newCapteur.id });
     res.status(201).json({
       message: "capteur created",
       data: newCapteur,
@@ -20,10 +23,21 @@ exports.createCapteur = async (req, res,next) => {
 
 exports.getAllCapteurs = async (req, res,next) => {
   try {
-    const capteurs = await Capteur.find();
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 10;
+    const skip = (page - 1) * limit;
+    const total = await Capteur.countDocuments();
+    const capteurs = await Capteur.find().skip(skip).limit(limit)
+    
     res.status(200).json({
       message: "capteurs fetched",
       data: capteurs,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
     });
   } catch (error) {
     next(error)
@@ -60,6 +74,7 @@ exports.updateCapteur = async (req, res,next) => {
     if (!capteur) {
       return next (new AppError("capteur n'est pas trouve", 404));
     }
+    
     res.status(200).json({ message: "capteur modifie", data: capteur });
   } catch (error) {
     next(error)
@@ -72,6 +87,7 @@ exports.deleteCapteur = async (req, res,next) => {
     if (!capteur) {
       return next (new AppError("capteur n'est pas trouve", 404));
     }
+    logger.info({ message: "capteur supprime", id: req.params.id });
     res.status(200).json({ message: "capteur supprime", data: capteur });
   } catch (error) {
     next(error)
