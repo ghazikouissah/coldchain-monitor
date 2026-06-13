@@ -12,6 +12,8 @@ const camionSchema = new mongoose.Schema({
     type:String,
     required:[true]
   },
+  latitude: { type: Number, default: 36.8065 },
+  longitude: { type: Number, default: 10.1815 },
   capteurs: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "capteur"
