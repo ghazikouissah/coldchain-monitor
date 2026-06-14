@@ -8,6 +8,12 @@
 #include <WiFiManager.h>
 #include <ArduinoOTA.h>
 #include <Preferences.h>
+#include "coldchain_model.h"
+#include "scaler_params.h"
+#include <TensorFlowLite_ESP32.h>
+#include "tensorflow/lite/micro/all_ops_resolver.h"
+#include "tensorflow/lite/micro/micro_interpreter.h"
+#include "tensorflow/lite/schema/schema_generated.h"
 
 #define DHTPIN 4
 #define DHTTYPE DHT22
@@ -29,6 +35,60 @@ struct SensorData {
 
 
 
+// TFLite globals
+const int kTensorArenaSize = 10 * 1024;
+uint8_t tensor_arena[kTensorArenaSize];
+
+void taskTinyML(void *pvParameters) {
+    // Setup TFLite
+    const tflite::Model* coldchain_tfl = tflite::GetModel(coldchain_model);
+    tflite::AllOpsResolver resolver;
+    tflite::MicroInterpreter interpreter(
+    coldchain_tfl, 
+    resolver, 
+    tensor_arena, 
+    kTensorArenaSize,
+    nullptr,  
+    nullptr,  
+    nullptr   
+);
+    interpreter.AllocateTensors();
+    
+    SensorData data;
+    float prev_temp = -18.0;
+    
+    while(1) {
+        if(xQueuePeek(queueData, &data, 100 / portTICK_PERIOD_MS)) {
+            
+            float variation = data.temperature - prev_temp;
+            prev_temp = data.temperature;
+            
+            
+            float input[3] = {
+                (data.temperature - SCALER_MEAN[0]) / SCALER_STD[0],
+                (variation - SCALER_MEAN[1]) / SCALER_STD[1],
+                (data.humidity - SCALER_MEAN[2]) / SCALER_STD[2]
+            };
+            
+            
+            float* model_input = interpreter.input(0)->data.f;
+            model_input[0] = input[0];
+            model_input[1] = input[1];
+            model_input[2] = input[2];
+            
+            interpreter.Invoke();
+            
+            float result = interpreter.output(0)->data.f[0];
+            
+            if(result > 0.5) {
+                Serial.printf("TinyML ANOMALIE détectée! Score: %.2f\n", result);
+            } else {
+                Serial.printf("TinyML Normal. Score: %.2f\n", result);
+            }
+        }
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
+    }
+}
 
 void setupOTA() {
     ArduinoOTA.setHostname("ColdChain-ESP32");
@@ -177,6 +237,7 @@ void setup() {
     xTaskCreatePinnedToCore(taskLireCapteurs, "Capteurs", 10000, NULL, 1, NULL, 1);
     xTaskCreatePinnedToCore(taskEnvoyerMQTT, "MQTT", 10000, NULL, 1, NULL, 0);
     xTaskCreatePinnedToCore(taskOTA, "OTA", 10000, NULL, 1, NULL, 0);
+    xTaskCreatePinnedToCore(taskTinyML, "TinyML", 20000, NULL, 1, NULL, 0);
 }
 
 void loop() {
