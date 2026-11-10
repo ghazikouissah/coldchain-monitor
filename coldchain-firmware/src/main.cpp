@@ -10,6 +10,7 @@
 #include <Preferences.h>
 #include "coldchain_model.h"
 #include "scaler_params.h"
+#include "coldchain_logic.h"
 #include <TensorFlowLite_ESP32.h>
 #include "tensorflow/lite/micro/all_ops_resolver.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
@@ -181,7 +182,7 @@ void taskLireCapteurs(void *pvParameters) {
         data.temperature = dht.readTemperature();
         data.humidity = dht.readHumidity();
         
-        if (!isnan(data.temperature) && !isnan(data.humidity)) {
+        if (sensor_reading_valid(data.temperature, data.humidity))  {
             xQueueSend(queueData, &data, portMAX_DELAY);
             Serial.print("Temp: ");
             Serial.print(data.temperature);
